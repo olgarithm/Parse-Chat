@@ -18,6 +18,7 @@ class ChatViewController: UIViewController, UITableViewDataSource {
     override func viewDidLoad() {
         super.viewDidLoad()
         tableView.dataSource = self
+        Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(self.getMessages), userInfo: nil, repeats: true)
     }
 
     override func didReceiveMemoryWarning() {
@@ -30,6 +31,8 @@ class ChatViewController: UIViewController, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ChatCell") as! ChatCell
+        let firstMessage = returnedMessages[indexPath.row]
+        cell.messageLabel.text = (firstMessage["text"] as! String)
         return cell
     }
     
@@ -46,6 +49,20 @@ class ChatViewController: UIViewController, UITableViewDataSource {
         }
     }
     
+    func getMessages() {
+        let query = PFQuery(className: "Message_fbu2017")
+        query.addDescendingOrder("createdAt")
+        query.findObjectsInBackground { (messages: [PFObject]?, error: Error?) in
+            if let messages = messages {
+                // do something with the array of object returned by the call
+                self.returnedMessages = messages
+                self.tableView.reloadData()
+            } else {
+                print(error?.localizedDescription as Any)
+            }
+        }
+    }
+
     /*
     // MARK: - Navigation
 
